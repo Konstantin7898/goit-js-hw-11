@@ -10,12 +10,17 @@ body {
   background-color: #fafafa;
   color: #212121;
   line-height: 1.5;
+  margin: 0;
 }
 
 .search-form {
   display: flex;
   text-align: center;
   justify-content: center;
+  background-color: royalblue;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
 }
 
 ul {
@@ -23,22 +28,95 @@ ul {
   padding: 0;
 }
 
-.country-name {
-  margin-left: 10px;
-  font-weight: 700;
-  font-size: 20px;
-}
-
-.additional-info {
-  font-size: 20px;
-  font-style: bold;
-}
-
-.one-country,
-.multiple-countries {
+.gallery {
   display: flex;
+  flex-wrap: wrap;
+  margin-left: -30px;
+  margin-top: -30px;
+  justify-content: center;
+  align-items: center;
 }
 
-.country {
-  font-weight: bold;
+.photo-card {
+  flex-basis: calc((100% - 10 * 15px) / 5);
+  height: 200px;
+  border-right: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  border-left: 1px solid #eee;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  max-width: unset;
+  object-fit: cover;
+  /* border-radius: 20px; */
+}
+
+.info {
+  display: flex;
+
+  padding: 5px;
+  text-align: center;
+  border-right: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  border-left: 1px solid #eee;
+  box-shadow: 0px 1px 1px rgb(0 0 0 / 12%), 0px 4px 4px rgb(0 0 0 / 6%),
+    1px 4px 6px rgb(0 0 0 / 16%);
+}
+
+.info-item {
+  margin-left: 10px;
+  margin: 0;
+  color: #757575;
+  font-size: 16px;
+  line-height: 1, 87;
+  letter-spacing: 0.03em;
+}
+.info-item:first-child {
+  margin-left: 0;
+}
+
+.info-list {
+  color: #212121;
+}
+
+.info-list:first-child {
+  margin-left: 10px;
+}
+
+.gallery__link {
+  flex-basis: calc((100% - 10 * 15px) / 5);
+  height: 200px;
+  margin-left: 15px;
+  margin-top: 30px;
+  margin-bottom: 50px;
+  border-radius: 10%;
+  text-decoration: none;
+}
+
+input {
+  width: 300px;
+  height: 40px;
+  padding: 10px 16px;
+  font-size: 18px;
+  border: none;
+
+  border-radius: 20px;
+}
+
+button {
+  width: 100px;
+  height: 40px;
+  font-size: 18px;
+  margin-left: 20px;
+
+  background-color: white;
+
+  border-radius: 20px;
+  border: none;
+}
+
+p {
+  margin: 0;
 }

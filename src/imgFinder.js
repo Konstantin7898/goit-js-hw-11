@@ -1,5 +1,4 @@
 import axios from 'axios';
-// import Notiflix from 'notiflix';
 
 class ImageFinder {
   constructor() {
@@ -17,9 +16,7 @@ class ImageFinder {
       );
       return res.data;
     } catch (error) {
-      Notiflix.Notify.failure('Some error occured');
-
-      return null;
+      throw new Error(error.message);
     }
   }
 

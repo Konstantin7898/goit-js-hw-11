@@ -9,6 +9,9 @@ const refs = {
   gallery: document.querySelector('.gallery'),
 };
 
+let limit = 0;
+let loadedImages = 0;
+
 const simpleLightBox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
   captionsDelay: 250,
@@ -25,71 +28,75 @@ async function onFormSubmit(e) {
   const searchValue = e.target.elements.searchQuery.value.trim();
   if (!searchValue.length) return;
 
-  imageFinder.searchQuery = searchValue;
-  const data = await imageFinder.fetchImg();
-  if (!data) return;
+  limit = 0;
+  loadedImages = 0;
 
-  console.log({ data });
+  imageFinder.resetPage();
+  imageFinder.query = searchValue;
 
-  // if la la la
-  renderImages(data.hits);
-  // const { totalHits, hits, total } = await fetchImg(searchQuery);
-  // e.target.reset();
+  try {
+    const data = await imageFinder.fetchImg();
+    if (!data.total) {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+      return;
+    }
+    renderImages(data.hits);
+    limit = data.totalHits;
+    loadedImages = data.hits.length;
+    Notiflix.Notify.success(`Horray! We found ${data.totalHits} images`);
+    simpleLightBox.refresh();
+    window.addEventListener('scroll', onScrollLoad);
+  } catch (error) {
+    Notiflix.Notify.failure(error);
+  }
 }
 
 function onScrollLoad() {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
   if (clientHeight + scrollTop >= scrollHeight) {
-    toGetImages();
+    getMoreImages();
   }
 }
 
-function toGetImages() {
-  imageFinder
-    .fetchImg()
-    .then(({ total, totalHits, hits }) => {
-      if (hits.length === 0 && totalHits === 0 && total === 0) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      } else {
-        insertMarkup(hits);
+async function getMoreImages() {
+  if (limit <= loadedImages) {
+    Notiflix.Notify.info(
+      `We're sorry, but you've reached the end of search results.`
+    );
+    window.removeEventListener('scroll', onScrollLoad);
+    return;
+  }
 
-        if (imageFinder.page === 1) {
-          if (!isEventListenerOnScroll) {
-            window.addEventListener('scroll', onScrollLoad);
-            isEventListenerOnScroll = true;
-          }
+  imageFinder.incrementPage();
+  try {
+    const { total, hits, totalHits } = await imageFinder.fetchImg();
+    loadedImages += hits.length;
 
-          Notiflix.Notify.success(`Horray! We found ${totalHits} images`);
-        } else {
-          const { height: cardHeight } = document
-            .querySelector('.gallery')
-            .firstElementChild.getBoundingClientRect();
+    if (total === totalHits) {
+      Notiflix.Notify.info(
+        `We're sorry, but you've reached the end of search results.`
+      );
+      window.removeEventListener('scroll', onScrollLoad);
+      return;
+    }
 
-          window.scrollBy({
-            top: cardHeight * 2,
-            behavior: 'smooth',
-          });
-        }
+    renderImages(hits);
 
-        if (total === totalHits) {
-          Notiflix.Notify.info(
-            `We're sorry, but you've reached the end of search results.`
-          );
-          window.removeEventListener('scroll', onScrollLoad);
-          isEventListenerOnScroll = false;
-        }
-        refs.searchFormEl.incrementPage();
-        simpleLightBox.refresh();
-      }
-    })
-    .catch(() => {
-      Notiflix.Notify.failure('Oops, something went wrong');
-    })
-    .finally(() => {
-      refs.searchFormEl.reset();
+    const { height: cardHeight } =
+      refs.gallery.firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
     });
+
+    simpleLightBox.refresh();
+  } catch (error) {
+    console.log(error);
+    Notiflix.Notify.failure(error);
+  }
 }
 
 function renderImages(images) {
@@ -104,23 +111,24 @@ function renderImages(images) {
       downloads,
     }) => {
       return `
+      <a href="${largeImageURL}" class="gallery__link">
       <div class="photo-card">
       <img src="${webformatURL}" alt="${tags}" data-large=${largeImageURL} loading="lazy" />
       <div class="info">
         <p class="info-item">
-          <b>Likes</b>
+          <b class= "">Likes</b>
           ${likes}
         </p>
         <p class="info-item">
-          <b>Views</b>
+          <b class= "">Views</b>
           ${views}
         </p>
         <p class="info-item">
-          <b>Comments</b>
+          <b class= "">Comments</b>
           ${comments}
         </p>
         <p class="info-item">
-          <b>Downloads</b>
+          <b class= "">Downloads</b>
           ${downloads}
         </p>
       </div>
