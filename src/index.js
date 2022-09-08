@@ -7,10 +7,12 @@ import Notiflix from 'notiflix';
 const refs = {
   searchFormEl: document.querySelector('#search-form'),
   gallery: document.querySelector('.gallery'),
+  observerTarget: document.querySelector('.bottom'),
 };
 
 let limit = 0;
 let loadedImages = 0;
+let intersectionObserver = null;
 
 const simpleLightBox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -47,17 +49,21 @@ async function onFormSubmit(e) {
     loadedImages = data.hits.length;
     Notiflix.Notify.success(`Horray! We found ${data.totalHits} images`);
     simpleLightBox.refresh();
-    window.addEventListener('scroll', onScrollLoad);
+
+    intersectionObserver = new IntersectionObserver(entries => {
+      if (entries[0].intersectionRatio <= 0) return;
+      onScrollLoad();
+    });
+
+    intersectionObserver.observe(refs.observerTarget);
   } catch (error) {
+    console.log(error);
     Notiflix.Notify.failure(error);
   }
 }
 
 function onScrollLoad() {
-  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-  if (clientHeight + scrollTop >= scrollHeight) {
-    getMoreImages();
-  }
+  getMoreImages();
 }
 
 async function getMoreImages() {
@@ -65,7 +71,7 @@ async function getMoreImages() {
     Notiflix.Notify.info(
       `We're sorry, but you've reached the end of search results.`
     );
-    window.removeEventListener('scroll', onScrollLoad);
+    intersectionObserver.unobserve(refs.observerTarget);
     return;
   }
 
@@ -78,7 +84,8 @@ async function getMoreImages() {
       Notiflix.Notify.info(
         `We're sorry, but you've reached the end of search results.`
       );
-      window.removeEventListener('scroll', onScrollLoad);
+      renderImages(hits);
+      intersectionObserver.unobserve(refs.observerTarget);
       return;
     }
 
